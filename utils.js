@@ -26,6 +26,7 @@ async function getPairData(n) {
     }
     let attackTricks = 0;
     let defenceTricks = 0;
+    const contracts = [];
     for (let i = 0; i < axesHandles.length; i++) {
         if (i % 5 !== 0) {
             const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd td')[1].textContent, axesHandles[i]);
@@ -36,7 +37,7 @@ async function getPairData(n) {
                 const suit = await page.evaluate(el => el.querySelectorAll('.nobrd td')[0].querySelector('img').src.at(-5), axesHandles[i]);
                 contract += transformSuit(suit);
             }
-            console.log(contract);
+            contracts.push(contract);
         } else {
             const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[1].textContent, axesHandles[i]);
             let contract = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].textContent, axesHandles[i]);
@@ -46,7 +47,7 @@ async function getPairData(n) {
                 const suit = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].querySelector('img').src.at(-5), axesHandles[i]);
                 contract += transformSuit(suit);
             }
-            console.log(contract);
+            contracts.push(contract);
         }
     }
     await browser.close()
