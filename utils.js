@@ -58,8 +58,24 @@ async function getPairData(n) {
             contracts.push(contract);
         }
     }
+    const tricks = [];
+    for (let i = 0; i < axesHandles.length; i++) {
+        let trick;
+        if (i % 5 === 0) {
+            trick = await page.evaluate(el => el.querySelectorAll(':scope > td')[6].textContent, axesHandles[i]);
+        } else {
+            trick = await page.evaluate(el => el.querySelectorAll(':scope > td')[3].textContent, axesHandles[i]);
+        }
+        if (!trick) {
+            tricks.push(undefined);
+        } else if (trick === '=') {
+            tricks.push(0);
+        } else {
+            tricks.push(Number(trick));
+        }
+    }
     await browser.close()
-    return contracts;
+    return tricks;
 }
 
 (async () => {
