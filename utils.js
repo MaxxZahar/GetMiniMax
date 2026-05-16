@@ -22,14 +22,18 @@ async function getPairData(n) {
     const axes = [];
     for (let i = 0; i < axesHandles.length; i += 5) {
         const axis = await page.evaluate(el => el.querySelectorAll('td')[1].textContent.at(-1), axesHandles[i]);
-        axes.push(axis);
+        for (let j = 0; j < 5; j++) {
+            axes.push(axis);
+        }
     }
     let attackTricks = 0;
     let defenceTricks = 0;
     const contracts = [];
+    const declarers = [];
     for (let i = 0; i < axesHandles.length; i++) {
         if (i % 5 !== 0) {
             const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd td')[1].textContent, axesHandles[i]);
+            declarers.push(declarer);
             let contract = await page.evaluate(el => el.querySelectorAll('.nobrd td')[0].textContent, axesHandles[i]);
             contract = contract.replaceAll('X', '');
             contract = contract.replaceAll(' ', '');
@@ -44,6 +48,7 @@ async function getPairData(n) {
             contracts.push(contract);
         } else {
             const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[1].textContent, axesHandles[i]);
+            declarers.push(declarer);
             let contract = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].textContent, axesHandles[i]);
             contract = contract.replaceAll('X', '');
             contract = contract.replaceAll(' ', '');
@@ -75,7 +80,8 @@ async function getPairData(n) {
         }
     }
     await browser.close()
-    return tricks;
+    const pair = { 'number': n, 'axes': axes, 'declarers': declarers, 'contracts': contracts, 'tricks': tricks };
+    return pair;
 }
 
 async function getDealData(n) {
@@ -107,6 +113,6 @@ async function getDealData(n) {
 }
 
 (async () => {
-    const axes = await getDealData(67);
+    const axes = await getPairData(11);
     console.log(axes);
 })();
