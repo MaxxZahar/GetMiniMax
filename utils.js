@@ -35,6 +35,7 @@ async function getPairData(n) {
             const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd td')[1].textContent, axesHandles[i]);
             declarers.push(declarer);
             let contract = await page.evaluate(el => el.querySelectorAll('.nobrd td')[0].textContent, axesHandles[i]);
+            contract = contract.trim();
             contract = contract.replaceAll('X', '');
             contract = contract.replaceAll(' ', '');
             if (contract.at(-1) !== 'T') {
@@ -50,6 +51,7 @@ async function getPairData(n) {
             const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[1].textContent, axesHandles[i]);
             declarers.push(declarer);
             let contract = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].textContent, axesHandles[i]);
+            contract = contract.trim();
             contract = contract.replaceAll('X', '');
             contract = contract.replaceAll(' ', '');
             if (contract.at(-1) !== 'T') {
@@ -80,7 +82,7 @@ async function getPairData(n) {
         }
     }
     await browser.close()
-    const pair = { 'number': n, 'axes': axes, 'declarers': declarers, 'contracts': contracts, 'tricks': tricks };
+    const pair = { 'axes': axes, 'declarers': declarers, 'contracts': contracts, 'tricks': tricks };
     return pair;
 }
 
@@ -113,6 +115,77 @@ async function getDealData(n) {
 }
 
 (async () => {
-    const axes = await getPairData(11);
-    console.log(axes);
+    const { axes, declarers, contracts, tricks } = await getPairData(11);
+    let attack = 0;
+    let attackCounter = 0;
+    let defence = 0;
+    let defenceCounter = 0;
+    for (let i = 0; i < axes.length; i++) {
+        if (contracts[i]) {
+            const contractLevel = Number(contracts[i][0]);
+            const tricksMade = contractLevel + 6 + tricks[i];
+            const dealData = await getDealData(i + 1);
+            let suit;
+            switch (contracts[i][1]) {
+                case "H":
+                    suit = 2;
+                    break;
+                case "S":
+                    suit = 1;
+                    break;
+                case "N":
+                    suit = 0;
+                    break;
+                case "C":
+                    suit = 4;
+                    break;
+                case "D":
+                    suit = 3;
+                    break;
+            }
+            switch (axes[i]) {
+                case 'W':
+                    switch (declarers[i]) {
+                        case 'W':
+                            attack += tricksMade - dealData['west'][suit];
+                            attackCounter++;
+                            break;
+                        case 'E':
+                            attack += tricksMade - dealData['east'][suit];
+                            attackCounter++;
+                            break;
+                        case 'S':
+                            defence += tricksMade - dealData['south'][suit];
+                            defenceCounter++;
+                            break;
+                        case 'N':
+                            defence += tricksMade - dealData['north'][suit];
+                            defenceCounter++;
+                            break;
+                    }
+                    break;
+                case 'S':
+                    switch (declarers[i]) {
+                        case 'W':
+                            defence += tricksMade - dealData['west'][suit];
+                            defenceCounter++;
+                            break;
+                        case 'E':
+                            defence += tricksMade - dealData['east'][suit];
+                            defenceCounter++;
+                            break;
+                        case 'S':
+                            attack += tricksMade - dealData['south'][suit];
+                            attackCounter++;
+                            break;
+                        case 'N':
+                            attack += tricksMade - dealData['north'][suit];
+                            attackCounter++;
+                            break;
+                    }
+                    break;
+            }
+        }
+    }
+    console.log(attack, attackCounter, defence, defenceCounter);
 })();
