@@ -34,8 +34,12 @@ async function getPairData(n) {
             contract = contract.replaceAll('X', '');
             contract = contract.replaceAll(' ', '');
             if (contract.at(-1) !== 'T') {
-                const suit = await page.evaluate(el => el.querySelectorAll('.nobrd td')[0].querySelector('img').src.at(-5), axesHandles[i]);
-                contract += transformSuit(suit);
+                try {
+                    const suit = await page.evaluate(el => el.querySelectorAll('.nobrd td')[0].querySelector('img').src.at(-5), axesHandles[i]);
+                    contract += transformSuit(suit);
+                } catch (err) {
+                    contract = undefined;
+                }
             }
             contracts.push(contract);
         } else {
@@ -44,16 +48,21 @@ async function getPairData(n) {
             contract = contract.replaceAll('X', '');
             contract = contract.replaceAll(' ', '');
             if (contract.at(-1) !== 'T') {
-                const suit = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].querySelector('img').src.at(-5), axesHandles[i]);
-                contract += transformSuit(suit);
+                try {
+                    const suit = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].querySelector('img').src.at(-5), axesHandles[i]);
+                    contract += transformSuit(suit);
+                } catch (err) {
+                    contract = undefined;
+                }
             }
             contracts.push(contract);
         }
     }
     await browser.close()
-    return axes;
+    return contracts;
 }
 
 (async () => {
-    const axes = await getPairData(11);
+    const axes = await getPairData(9);
+    console.log(axes);
 })();
