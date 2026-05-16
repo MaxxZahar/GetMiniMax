@@ -78,7 +78,35 @@ async function getPairData(n) {
     return tricks;
 }
 
+async function getDealData(n) {
+    const path = `https://spb.bridgesport.ru/spb/p0526/p0526d${n}p.php`;
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.goto(path);
+    await page.setViewport({ width: 1080, height: 1024 });
+    const dealHandles = await page.$$('.deal td[align="center"]');
+    const north = [];
+    const east = [];
+    const south = [];
+    const west = [];
+    for (let i = 6; i < 11; i++) {
+        north.push(Number(await page.evaluate(el => el.textContent, dealHandles[i])));
+    }
+    for (let i = 11; i < 16; i++) {
+        east.push(Number(await page.evaluate(el => el.textContent, dealHandles[i])));
+    }
+    for (let i = 16; i < 21; i++) {
+        south.push(Number(await page.evaluate(el => el.textContent, dealHandles[i])));
+    }
+    for (let i = 21; i < 26; i++) {
+        west.push(Number(await page.evaluate(el => el.textContent, dealHandles[i])));
+    }
+    deal = { 'north': north, 'east': east, 'south': south, 'west': west };
+    await browser.close();
+    return deal;
+}
+
 (async () => {
-    const axes = await getPairData(9);
+    const axes = await getDealData(67);
     console.log(axes);
 })();
