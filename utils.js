@@ -31,38 +31,43 @@ async function getPairData(n) {
     const contracts = [];
     const declarers = [];
     for (let i = 0; i < axesHandles.length; i++) {
-        if (i % 5 !== 0) {
-            const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd td')[1].textContent, axesHandles[i]);
-            declarers.push(declarer);
-            let contract = await page.evaluate(el => el.querySelectorAll('.nobrd td')[0].textContent, axesHandles[i]);
-            contract = contract.trim();
-            contract = contract.replaceAll('X', '');
-            contract = contract.replaceAll(' ', '');
-            if (contract.at(-1) !== 'T') {
-                try {
-                    const suit = await page.evaluate(el => el.querySelectorAll('.nobrd td')[0].querySelector('img').src.at(-5), axesHandles[i]);
-                    contract += transformSuit(suit);
-                } catch (err) {
-                    contract = undefined;
+        try {
+            if (i % 5 !== 0) {
+                const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd td')[1].textContent, axesHandles[i]);
+                declarers.push(declarer);
+                let contract = await page.evaluate(el => el.querySelectorAll('.nobrd td')[0].textContent, axesHandles[i]);
+                contract = contract.trim();
+                contract = contract.replaceAll('X', '');
+                contract = contract.replaceAll(' ', '');
+                if (contract.at(-1) !== 'T') {
+                    try {
+                        const suit = await page.evaluate(el => el.querySelectorAll('.nobrd td')[0].querySelector('img').src.at(-5), axesHandles[i]);
+                        contract += transformSuit(suit);
+                    } catch (err) {
+                        contract = undefined;
+                    }
                 }
-            }
-            contracts.push(contract);
-        } else {
-            const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[1].textContent, axesHandles[i]);
-            declarers.push(declarer);
-            let contract = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].textContent, axesHandles[i]);
-            contract = contract.trim();
-            contract = contract.replaceAll('X', '');
-            contract = contract.replaceAll(' ', '');
-            if (contract.at(-1) !== 'T') {
-                try {
-                    const suit = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].querySelector('img').src.at(-5), axesHandles[i]);
-                    contract += transformSuit(suit);
-                } catch (err) {
-                    contract = undefined;
+                contracts.push(contract);
+            } else {
+                const declarer = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[1].textContent, axesHandles[i]);
+                declarers.push(declarer);
+                let contract = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].textContent, axesHandles[i]);
+                contract = contract.trim();
+                contract = contract.replaceAll('X', '');
+                contract = contract.replaceAll(' ', '');
+                if (contract.at(-1) !== 'T') {
+                    try {
+                        const suit = await page.evaluate(el => el.querySelectorAll('.nobrd')[1].querySelectorAll('td')[0].querySelector('img').src.at(-5), axesHandles[i]);
+                        contract += transformSuit(suit);
+                    } catch (err) {
+                        contract = undefined;
+                    }
                 }
+                contracts.push(contract);
             }
-            contracts.push(contract);
+        } catch (err) {
+            declarers.push('N');
+            contracts.push(undefined);
         }
     }
     const tricks = [];
@@ -115,7 +120,7 @@ async function getDealData(n) {
 }
 
 (async () => {
-    const { axes, declarers, contracts, tricks } = await getPairData(11);
+    const { axes, declarers, contracts, tricks } = await getPairData(15);
     let attack = 0;
     let attackCounter = 0;
     let defence = 0;
