@@ -1,4 +1,7 @@
 const puppeteer = require('puppeteer');
+const pth = require('path');
+const fs = require('fs');
+const numberOfPairs = 16;
 
 
 function transformSuit(suit) {
@@ -120,77 +123,103 @@ async function getDealData(n) {
 }
 
 (async () => {
-    const { axes, declarers, contracts, tricks } = await getPairData(15);
-    let attack = 0;
-    let attackCounter = 0;
-    let defence = 0;
-    let defenceCounter = 0;
-    for (let i = 0; i < axes.length; i++) {
-        if (contracts[i]) {
-            const contractLevel = Number(contracts[i][0]);
-            const tricksMade = contractLevel + 6 + tricks[i];
-            const dealData = await getDealData(i + 1);
-            let suit;
-            switch (contracts[i][1]) {
-                case "H":
-                    suit = 2;
-                    break;
-                case "S":
-                    suit = 1;
-                    break;
-                case "N":
-                    suit = 0;
-                    break;
-                case "C":
-                    suit = 4;
-                    break;
-                case "D":
-                    suit = 3;
-                    break;
-            }
-            switch (axes[i]) {
-                case 'W':
-                    switch (declarers[i]) {
-                        case 'W':
-                            attack += tricksMade - dealData['west'][suit];
-                            attackCounter++;
-                            break;
-                        case 'E':
-                            attack += tricksMade - dealData['east'][suit];
-                            attackCounter++;
-                            break;
-                        case 'S':
-                            defence += tricksMade - dealData['south'][suit];
-                            defenceCounter++;
-                            break;
-                        case 'N':
-                            defence += tricksMade - dealData['north'][suit];
-                            defenceCounter++;
-                            break;
-                    }
-                    break;
-                case 'S':
-                    switch (declarers[i]) {
-                        case 'W':
-                            defence += tricksMade - dealData['west'][suit];
-                            defenceCounter++;
-                            break;
-                        case 'E':
-                            defence += tricksMade - dealData['east'][suit];
-                            defenceCounter++;
-                            break;
-                        case 'S':
-                            attack += tricksMade - dealData['south'][suit];
-                            attackCounter++;
-                            break;
-                        case 'N':
-                            attack += tricksMade - dealData['north'][suit];
-                            attackCounter++;
-                            break;
-                    }
-                    break;
+    const outputPath = pth.join('./', 'data', 'data.csv');
+    const wStream = fs.createWriteStream(outputPath);
+    for (let j = 0; j < numberOfPairs; j++) {
+        console.log(`Working on ${j + 1} pair`);
+        let axes, declarers, contracts, tricks;
+        try {
+            const data = await getPairData(j + 1);
+            axes = data.axes;
+            declarers = data.declarers;
+            contracts = data.contracts;
+            tricks = data.tricks;
+        } catch (err) {
+            console.log(err.message);
+            j--;
+            continue;
+        }
+        let attack = 0;
+        let attackCounter = 0;
+        let defence = 0;
+        let defenceCounter = 0;
+        for (let i = 0; i < axes.length; i++) {
+            if (contracts[i]) {
+                const contractLevel = Number(contracts[i][0]);
+                const tricksMade = contractLevel + 6 + tricks[i];
+                let dealData;
+                try {
+                    dealData = await getDealData(i + 1);
+                } catch (err) {
+                    console.log(err.message);
+                    i--;
+                    continue;
+                }
+                let suit;
+                switch (contracts[i][1]) {
+                    case "H":
+                        suit = 2;
+                        break;
+                    case "S":
+                        suit = 1;
+                        break;
+                    case "N":
+                        suit = 0;
+                        break;
+                    case "C":
+                        suit = 4;
+                        break;
+                    case "D":
+                        suit = 3;
+                        break;
+                }
+                switch (axes[i]) {
+                    case 'W':
+                        switch (declarers[i]) {
+                            case 'W':
+                                attack += tricksMade - dealData['west'][suit];
+                                attackCounter++;
+                                break;
+                            case 'E':
+                                attack += tricksMade - dealData['east'][suit];
+                                attackCounter++;
+                                break;
+                            case 'S':
+                                defence += tricksMade - dealData['south'][suit];
+                                defenceCounter++;
+                                break;
+                            case 'N':
+                                defence += tricksMade - dealData['north'][suit];
+                                defenceCounter++;
+                                break;
+                        }
+                        break;
+                    case 'S':
+                        switch (declarers[i]) {
+                            case 'W':
+                                defence += tricksMade - dealData['west'][suit];
+                                defenceCounter++;
+                                break;
+                            case 'E':
+                                defence += tricksMade - dealData['east'][suit];
+                                defenceCounter++;
+                                break;
+                            case 'S':
+                                attack += tricksMade - dealData['south'][suit];
+                                attackCounter++;
+                                break;
+                            case 'N':
+                                attack += tricksMade - dealData['north'][suit];
+                                attackCounter++;
+                                break;
+                        }
+                        break;
+                }
             }
         }
+        //console.log(attack, attackCounter, defence, defenceCounter);
+        wStream.write(`${j + 1};${attack};${attackCounter};${attack / attackCounter};${defence};${defenceCounter};${defence / defenceCounter}\n`);
+
     }
-    console.log(attack, attackCounter, defence, defenceCounter);
+    wStream.end();
 })();
