@@ -145,6 +145,8 @@ async function getDealData(n) {
         let defenceCounter = 0;
         let attackLevelSum = 0;
         let defenceLevelSum = 0;
+        let contractsMade = 0;
+        let contractsDefeated = 0;
         for (let i = 0; i < axes.length; i++) {
             if (contracts[i]) {
                 const contractLevel = Number(contracts[i][0]);
@@ -182,21 +184,33 @@ async function getDealData(n) {
                                 attack += tricksMade - dealData['west'][suit];
                                 attackCounter++;
                                 attackLevelSum += contractLevel;
+                                if (tricksMade >= contractLevel + 6) {
+                                    contractsMade += 1;
+                                }
                                 break;
                             case 'E':
                                 attack += tricksMade - dealData['east'][suit];
                                 attackCounter++;
                                 attackLevelSum += contractLevel;
+                                if (tricksMade >= contractLevel + 6) {
+                                    contractsMade += 1;
+                                }
                                 break;
                             case 'S':
                                 defence += tricksMade - dealData['south'][suit];
                                 defenceCounter++;
                                 defenceLevelSum += contractLevel;
+                                if (tricksMade < contractLevel + 6) {
+                                    contractsDefeated += 1;
+                                }
                                 break;
                             case 'N':
                                 defence += tricksMade - dealData['north'][suit];
                                 defenceCounter++;
                                 defenceLevelSum += contractLevel;
+                                if (tricksMade < contractLevel + 6) {
+                                    contractsDefeated += 1;
+                                }
                                 break;
                         }
                         break;
@@ -206,21 +220,33 @@ async function getDealData(n) {
                                 defence += tricksMade - dealData['west'][suit];
                                 defenceCounter++;
                                 defenceLevelSum += contractLevel;
+                                if (tricksMade < contractLevel + 6) {
+                                    contractsDefeated += 1;
+                                }
                                 break;
                             case 'E':
                                 defence += tricksMade - dealData['east'][suit];
                                 defenceCounter++;
                                 defenceLevelSum += contractLevel;
+                                if (tricksMade < contractLevel + 6) {
+                                    contractsDefeated += 1;
+                                }
                                 break;
                             case 'S':
                                 attack += tricksMade - dealData['south'][suit];
                                 attackCounter++;
                                 attackLevelSum += contractLevel;
+                                if (tricksMade >= contractLevel + 6) {
+                                    contractsMade += 1;
+                                }
                                 break;
                             case 'N':
                                 attack += tricksMade - dealData['north'][suit];
                                 attackCounter++;
                                 attackLevelSum += contractLevel;
+                                if (tricksMade >= contractLevel + 6) {
+                                    contractsMade += 1;
+                                }
                                 break;
                         }
                         break;
@@ -228,7 +254,7 @@ async function getDealData(n) {
             }
         }
         //console.log(attack, attackCounter, defence, defenceCounter);
-        wStream.write(`${j + 1};${attack};${attackCounter};${attack / attackCounter};${defence};${defenceCounter};${defence / defenceCounter};${attackLevelSum / attackCounter};${defenceLevelSum / defenceCounter}\n`);
+        wStream.write(`${j + 1};${attack};${attackCounter};${attack / attackCounter};${defence};${defenceCounter};${defence / defenceCounter};${attackLevelSum / attackCounter};${defenceLevelSum / defenceCounter};${contractsMade / attackCounter};${contractsDefeated / defenceCounter}\n`);
 
     }
     wStream.end();
