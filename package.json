@@ -10,6 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "puppeteer": "^24.43.1"
+    "puppeteer": "^24.43.1",
+    "windows-1251": "^3.0.4"
   }
 }
