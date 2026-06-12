@@ -75,6 +75,10 @@ async function getDealData(path) {
         } else {
             tricks = Number(tricks);
         }
+        if (isNaN(tricks)) {
+            console.log('RESULT WARNING');
+            tricks = 0;
+        }
         if (contract) {
             const contractLevel = Number(contract[0]);
             const suit = getSuit(contract);
@@ -138,15 +142,15 @@ async function getDealData(path) {
     const wStream = fs.createWriteStream(outputPath, { encoding: 'utf-8' });
     for (let i = 1; i < 25; i++) {
         console.log(`Working Session 1 Deal ${i}`);
-        await getDealData(`https://spb.bridgesport.ru/spb/pCr26/p030126_1/d${i}p.php#h`);
+        await getDealData(`https://spb.bridgesport.ru/spb/WN26p/p110626_1/d${i}p.php#h`);
     }
     for (let i = 1; i < 25; i++) {
         console.log(`Working Session 2 Deal ${i}`);
-        await getDealData(`https://spb.bridgesport.ru/spb/pCr26/p030126_2/d${i}p.php#h`);
+        await getDealData(`https://spb.bridgesport.ru/spb/WN26p/p110626_2/d${i}p.php#h`);
     }
     for (let i = 1; i < 25; i++) {
         console.log(`Working Session 3 Deal ${i}`);
-        await getDealData(`https://spb.bridgesport.ru/spb/pCr26/p030126_3/d${i}p.php#h`);
+        await getDealData(`https://spb.bridgesport.ru/spb/WN26p/p110626_3/d${i}p.php#h`);
     }
     const header = 'Пара;Attack;Made;AttMini;AvgAttMini;Defence;Defeated;DefMini;AvgDefMini\n';
     wStream.write(header);
